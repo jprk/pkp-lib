@@ -279,6 +279,16 @@ function strtolower_codesafe($str) {
 }
 
 /**
+ * Perform a code-safe strtoupper, i.e. one that doesn't behave differently
+ * based on different locales. See strtolower_codesafe for explanation.
+ * @param $str string Input string
+ * @return string
+ */
+function strtoupper_codesafe($str) {
+	return strtr($str, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+}
+
+/**
  * Convert a Windows path to a cygwin path.
  * @param string $path Windows path
  * @return string Cygwin path.
@@ -291,5 +301,26 @@ function cygwinConversion($path) {
 		$path = PKPString::regexp_replace('/^[A-Z]:/i', '/cygdrive/' . strtolower($matches[1]), $path);
 	}
 	return $path;
+}
+
+/**
+ * Create a globbing pattern that would match all case-insensitive variants of the input string.
+ * Example: 'PDF' would be converted to '[Pp][Dd][Ff]'.
+ * Note: Not tested on Windows.
+ * Note: Works on ASCII strings only, cannot handle multibyte properly.
+ * @param string $str Base string to derive the pattern from
+ * @return string Case-insensitive globbing pattern
+ */
+function glob_ci_pattern($str) {
+	$lc = strtolower_codesafe($str);
+	$uc = strtoupper_codesafe($str);
+	$ret = '';
+	$i = 0;
+	$len = strlen($str); // assuming ASCII only
+	while ($i < $len) {
+		$ret = $ret . '['.$uc[$i].$lc[$i].']';
+		$i++;
+	}
+	return $ret;
 }
 ?>
